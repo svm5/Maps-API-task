@@ -45,11 +45,13 @@ while True:
         
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_PAGEUP:
-                map_zoom += 1
-                new_map(map_zoom)
+                if map_zoom < 19:
+                    map_zoom += 1
+                    new_map(map_zoom)
             elif event.key == pygame.K_PAGEDOWN:
-                map_zoom -= 1
-                new_map(map_zoom)
+                if map_zoom > 1:
+                    map_zoom -= 1
+                    new_map(map_zoom)
 
     pygame.display.flip()
 
