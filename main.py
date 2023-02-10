@@ -42,25 +42,24 @@ with open(map_file, "wb") as file:
     file.write(response.content)
 
 pygame.init()
-screen = pygame.display.set_mode((600, 500))
-manager = pygame_gui.UIManager((600, 500))
+screen = pygame.display.set_mode((720, 500))
+manager = pygame_gui.UIManager((720, 500))
 button_map = pygame_gui.elements.UIButton(  # схема
-    relative_rect=pygame.Rect(200, 10, 100, 30),
+    relative_rect=pygame.Rect(610, 50, 100, 30),
     text="Схема",
     manager=manager
 )
 button_sat = pygame_gui.elements.UIButton(  # спутник
-    relative_rect=pygame.Rect(320, 10, 100, 30),
+    relative_rect=pygame.Rect(610, 100, 100, 30),
     text="Спутник",
     manager=manager
 )
 button_skl = pygame_gui.elements.UIButton(  # гибрид
-    relative_rect=pygame.Rect(440, 10, 100, 30),
+    relative_rect=pygame.Rect(610, 150, 100, 30),
     text="Гибрид",
     manager=manager
 )
 clock = pygame.time.Clock()
-# cnt = 0
 while True:
     time_delta = clock.tick(60) / 1000.0
     screen.fill((255, 255, 255))  # белый фон
