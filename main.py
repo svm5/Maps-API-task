@@ -6,13 +6,18 @@ import pygame_gui
 from pygame.locals import *
 import requests
 
+from pprint import pprint
+from geocoder import geocode
+
 
 map_zoom = 10
 map_ll = '30.315831,59.939090'
 map_l = 'map'
+map_pt = None
 map_key = ''
 map_request = f"https://static-maps.yandex.ru/1.x/?z={map_zoom}&ll={map_ll}&l={map_l}"
 response = requests.get(map_request)
+
 
 if not response:
     print("Ошибка выполнения запроса:")
@@ -25,8 +30,10 @@ def new_map():
     params = {
         "ll": f"{map_ll.split(',')[0]},{map_ll.split(',')[1]}",
         "l": map_l,
-        'z': map_zoom
+        'z': map_zoom,
     }
+    if map_pt is not None:
+        params["pt"] = str(map_pt.split()[0] + ',' + map_pt.split()[1] + ',pm2rdm')
     response = requests.get("http://static-maps.yandex.ru/1.x/", params=params)
     if not response:
         print("Ошибка выполнения запроса:")
@@ -59,6 +66,10 @@ button_skl = pygame_gui.elements.UIButton(  # гибрид
     text="Гибрид",
     manager=manager
 )
+entry = pygame_gui.elements.UITextEntryLine(
+    relative_rect=pygame.Rect(10, 10, 590, 30),
+    manager=manager
+)
 clock = pygame.time.Clock()
 while True:
     time_delta = clock.tick(60) / 1000.0
@@ -77,6 +88,17 @@ while True:
                 map_zoom -= 1
                 new_map()
         elif event.type == pygame.USEREVENT:
+            if event.user_type == pygame_gui.UI_TEXT_ENTRY_FINISHED:
+                address = event.text
+                status, content = geocode(address)
+                # print(status)
+                # pprint(content)
+                if status is True and content is not None:
+                    pos = content["Point"]["pos"]
+                    map_ll = pos.split()[0] + "," + pos.split()[1]
+                    map_pt = pos
+                    new_map()
+
             if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == button_map:
                     map_l = "map"
