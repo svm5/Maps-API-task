@@ -66,6 +66,11 @@ button_skl = pygame_gui.elements.UIButton(  # гибрид
     text="Гибрид",
     manager=manager
 )
+button_reset = pygame_gui.elements.UIButton(  # гибрид
+    relative_rect=pygame.Rect(610, 300, 100, 80),
+    text="Сбросить",
+    manager=manager
+)
 entry = pygame_gui.elements.UITextEntryLine(
     relative_rect=pygame.Rect(10, 10, 590, 30),
     manager=manager
@@ -87,6 +92,30 @@ while True:
             elif event.key == pygame.K_PAGEDOWN:
                 map_zoom -= 1
                 new_map()
+            elif event.key == pygame.K_RIGHT:
+                a = map_ll.split(',')[0]
+                b = map_ll.split(',')[1]
+                if float(a) + 1 < 180:
+                    map_ll = f'{float(a) + 1},{b}'
+                    new_map()
+            elif event.key == pygame.K_LEFT:
+                a = map_ll.split(',')[0]
+                b = map_ll.split(',')[1]
+                if float(a) - 1 > 0:
+                    map_ll = f'{float(a) - 1},{b}'
+                    new_map()
+            elif event.key == pygame.K_DOWN:
+                a = map_ll.split(',')[0]
+                b = map_ll.split(',')[1]
+                if float(b) - 1 > -85:
+                    map_ll = f'{a},{float(b) - 1}'
+                    new_map()
+            elif event.key == pygame.K_UP:
+                a = map_ll.split(',')[0]
+                b = map_ll.split(',')[1]
+                if float(b) + 1 < 85:
+                    map_ll = f'{a},{float(b) + 1}'
+                    new_map()
         elif event.type == pygame.USEREVENT:
             if event.user_type == pygame_gui.UI_TEXT_ENTRY_FINISHED:
                 address = event.text
@@ -98,7 +127,6 @@ while True:
                     map_ll = pos.split()[0] + "," + pos.split()[1]
                     map_pt = pos
                     new_map()
-
             if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == button_map:
                     map_l = "map"
@@ -106,6 +134,8 @@ while True:
                     map_l = "sat"
                 if event.ui_element == button_skl:
                     map_l = "skl"
+                if event.ui_element == button_reset:
+                    map_pt = None
                 new_map()
         manager.process_events(event)
     manager.update(time_delta)
