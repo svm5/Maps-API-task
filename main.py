@@ -43,14 +43,26 @@ def new_map():
     with open(map_file, "wb") as file:
         file.write(response.content)
 
+    
+def make_address(content):
+    res = """"""
+    for el in content["metaDataProperty"]["GeocoderMetaData"]["Address"]["Components"]:
+        res += ", "
+        if el["kind"] == "locality":
+            print("!!!!!!!!!!")
+            res += "\n"
+        res += el["name"]
+    print(res)
+    return res[2:]
+
 
 map_file = "map.png"
 with open(map_file, "wb") as file:
     file.write(response.content)
 
 pygame.init()
-screen = pygame.display.set_mode((720, 500))
-manager = pygame_gui.UIManager((720, 500))
+screen = pygame.display.set_mode((720, 550))
+manager = pygame_gui.UIManager((720, 550))
 button_map = pygame_gui.elements.UIButton(  # схема
     relative_rect=pygame.Rect(610, 50, 100, 30),
     text="Схема",
@@ -75,11 +87,17 @@ entry = pygame_gui.elements.UITextEntryLine(
     relative_rect=pygame.Rect(10, 10, 590, 30),
     manager=manager
 )
+font = pygame.font.Font(None, 20)
+text_address = ""
+string_rendered = font.render(text_address, 1, "black")
 clock = pygame.time.Clock()
 while True:
     time_delta = clock.tick(60) / 1000.0
     screen.fill((255, 255, 255))  # белый фон
     screen.blit(pygame.image.load(map_file), (0, 50))
+    for i in range (len(text_address.split("\n"))):
+        string_rendered = font.render(text_address.split("\n")[i], 1, "black")
+        screen.blit(string_rendered, pygame.Rect(10, 510 + i * 12, 700, 30))
     for event in pygame.event.get():
         if event.type == QUIT:
             os.remove(map_file)
@@ -123,6 +141,9 @@ while True:
                 # print(status)
                 # pprint(content)
                 if status is True and content is not None:
+                    text_address = "Адрес: " + make_address(content)
+                    print(text_address)
+                    string_rendered = font.render(text_address, 1, "black")
                     pos = content["Point"]["pos"]
                     map_ll = pos.split()[0] + "," + pos.split()[1]
                     map_pt = pos
@@ -136,6 +157,7 @@ while True:
                     map_l = "skl"
                 if event.ui_element == button_reset:
                     map_pt = None
+                    text_address = ""
                 new_map()
         manager.process_events(event)
     manager.update(time_delta)
