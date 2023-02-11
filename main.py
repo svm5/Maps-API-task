@@ -49,11 +49,18 @@ def make_address(content):
     for el in content["metaDataProperty"]["GeocoderMetaData"]["Address"]["Components"]:
         res += ", "
         if el["kind"] == "locality":
-            print("!!!!!!!!!!")
+            # print("!!!!!!!!!!")
             res += "\n"
         res += el["name"]
-    print(res)
+    # print(res)
     return res[2:]
+
+
+def get_index(content):
+    res = "-"
+    if "postal_code" in content["metaDataProperty"]["GeocoderMetaData"]["Address"]:
+        res = content["metaDataProperty"]["GeocoderMetaData"]["Address"]["postal_code"]
+    return res
 
 
 map_file = "map.png"
@@ -87,17 +94,29 @@ entry = pygame_gui.elements.UITextEntryLine(
     relative_rect=pygame.Rect(10, 10, 590, 30),
     manager=manager
 )
+index = pygame_gui.elements.ui_drop_down_menu.UIDropDownMenu(
+    options_list=["Показать", "Скрыть"],
+    starting_option="Скрыть",
+    relative_rect=pygame.Rect(610, 250, 100, 30),
+    manager=manager
+)
+flag_index = "Скрыть"
+index = None
 font = pygame.font.Font(None, 20)
 text_address = ""
-string_rendered = font.render(text_address, 1, "black")
 clock = pygame.time.Clock()
 while True:
     time_delta = clock.tick(60) / 1000.0
     screen.fill((255, 255, 255))  # белый фон
     screen.blit(pygame.image.load(map_file), (0, 50))
+    screen.blit(font.render("Слои", 1, "black"), pygame.Rect(640, 30, 50, 50))
+    screen.blit(font.render("Индекс", 1, "black"), pygame.Rect(630, 230, 50, 50))
     for i in range (len(text_address.split("\n"))):
         string_rendered = font.render(text_address.split("\n")[i], 1, "black")
         screen.blit(string_rendered, pygame.Rect(10, 510 + i * 12, 700, 30))
+    if flag_index == "Показать" and index is not None:
+        string_rendered = font.render(index, 1, "black")
+        screen.blit(string_rendered, pygame.Rect(10, 510 + 2 * 12, 700, 30))
     for event in pygame.event.get():
         if event.type == QUIT:
             os.remove(map_file)
@@ -135,6 +154,8 @@ while True:
                     map_ll = f'{a},{float(b) + 1}'
                     new_map()
         elif event.type == pygame.USEREVENT:
+            if event.user_type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
+                flag_index = event.text
             if event.user_type == pygame_gui.UI_TEXT_ENTRY_FINISHED:
                 address = event.text
                 status, content = geocode(address)
@@ -142,7 +163,8 @@ while True:
                 # pprint(content)
                 if status is True and content is not None:
                     text_address = "Адрес: " + make_address(content)
-                    print(text_address)
+                    index = "Индекс: " + get_index(content)
+                    # print(text_address)
                     string_rendered = font.render(text_address, 1, "black")
                     pos = content["Point"]["pos"]
                     map_ll = pos.split()[0] + "," + pos.split()[1]
@@ -158,6 +180,7 @@ while True:
                 if event.ui_element == button_reset:
                     map_pt = None
                     text_address = ""
+                    index = None
                 new_map()
         manager.process_events(event)
     manager.update(time_delta)
